@@ -2,6 +2,7 @@ import GHub from '@/ghub'
 import logger from '@/logger'
 import server from '@/server'
 import * as DeviceManager from '@/manager'
+import * as WebsocketManager from '@/server/websocket'
 
 server()
 
@@ -38,7 +39,13 @@ ghub.on('message', (message) => {
             DeviceManager.updateBattery(message.payload)
             break
         }
+
+        default: {
+            return
+        }
     }
+
+    WebsocketManager.send('update', DeviceManager.getDevices())
 })
 
 ghub.on('disconnected', () => {
