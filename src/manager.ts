@@ -6,10 +6,13 @@ const ghub = GHub.getInstance()
 export const devices = new Map<string, DeviceInfo>()
 export const batteries = new Map<string, Battery>()
 
+const disconnectedDevices = new Set<string>()
+
 export function updateDevice(device: DeviceInfo) {
     switch (device.state) {
         case 'ACTIVE': {
             devices.set(device.id, device)
+            disconnectedDevices.delete(device.id)
             ghub.get(`/battery/${device.id}/state`)
             break
         }
@@ -22,6 +25,7 @@ export function updateDevice(device: DeviceInfo) {
 
         case 'NOT_CONNECTED': {
             batteries.delete(device.id)
+            disconnectedDevices.add(device.id)
             break
         }
 
@@ -43,6 +47,7 @@ export function getDevices() {
         return {
             ...device,
             battery,
+            isDisconnected: disconnectedDevices.has(device.id),
         }
     })
 }
@@ -54,5 +59,6 @@ export function getDevice(id: string) {
     return {
         ...device,
         battery,
+        isDisconnected: disconnectedDevices.has(id),
     }
 }
