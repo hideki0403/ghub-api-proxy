@@ -1,5 +1,6 @@
 import ws from 'ws'
 import ReconnectingWebSocket, { type ErrorEvent } from 'reconnecting-websocket'
+import { randomBytes } from 'crypto'
 import { EventEmitter } from 'events'
 import StrictEventEmitter from 'strict-event-emitter-types'
 import type { WsResponse } from './types'
@@ -14,9 +15,12 @@ export default class GHub extends (EventEmitter as { new(): StrictEventEmitter<E
 
         this.ws = new ReconnectingWebSocket(`ws://${url}:${port}`, 'json', {
             WebSocket: createWebSocket({
-                origin: 'file://'
+                origin: 'file://',
+                headers: {
+                    'Sec-Websocket-Version': '13',
+                    'Sec-Websocket-Key': randomBytes(16).toString('base64'),
+                }
             }),
-
         })
 
         this.ws.onopen = () => this.emit('connected')
@@ -64,6 +68,10 @@ export default class GHub extends (EventEmitter as { new(): StrictEventEmitter<E
             path,
             payload,
         })
+    }
+
+    close() {
+        this.ws.close()
     }
 }
 
