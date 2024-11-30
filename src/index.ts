@@ -55,3 +55,11 @@ ghub.on('disconnected', () => {
 ghub.on('error', (error) => {
     log.error(error)
 })
+
+log.info('Starting...')
+log.info(`PID: ${process.pid}`)
+
+process.on('exit', () => {
+    log.info('Shutting down...')
+    ghub.close()
+})
